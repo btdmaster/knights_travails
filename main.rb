@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Knight
   def in_board?(location)
     location.each { |i| return false unless (0..7).include?(i) }
@@ -7,7 +8,7 @@ class Knight
 
   def generate_moves(source)
     moves = []
-    adjustments = [[1, 2], [2, 1], [-1, 2], [2, -1], [-1, 2], [2, -1], [-1, -2], [-2, -1]]
+    adjustments = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
     adjustments.each do |adjustment|
       moves.append(sum(source, adjustment))
     end
@@ -18,43 +19,29 @@ class Knight
     [source[0] + adjustment[0], source[1] + adjustment[1]]
   end
 
-  def knight_moves(source, destination, tree = Tree.new(Node.new(source)), root = tree.root)
-    generate_moves(source).each do |move|
-      root.children.append(Node.new(move))
+  def knight_moves(source, destination, root = Node.new(source), node = root)
+    generate_moves(source).each do |child|
+      node.children.append(Node.new(child))
     end
-    solution = tree.find(destination)
-    if solution.nil?
-      tree.root.children.each do |child|
-        knight_moves(child.position, destination, tree, child)
-      end
-    else
-      p destination
-      return tree
+    solution = root.path(destination)
+    return solution if solution
+
+    node.children.each do |child|
+      knight_moves(child.position, destination, root, child)
     end
   end
 end
-class Tree
-  attr_accessor :root
-  def initialize(root)
-    @root = root
-  end
-  def find(value, root = @root)
-    return nil if root == nil
-    if root.position == value
-      return root
-    else
-      root.children.each do |child|
-        find(value, child)
-      end
-    end
-  end
-end
+
 class Node
   attr_accessor :position, :children
+
   def initialize(position, children = [])
     @position = position
     @children = children
   end
+  def path(destination)
+  end
 end
+
 knight = Knight.new
-p knight.knight_moves([1,2], [7, 6])
+p knight.knight_moves([1, 2], [3, 7])
