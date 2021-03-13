@@ -23,7 +23,7 @@ class Knight
     generate_moves(source).each do |child|
       node.children.append(Node.new(child))
     end
-    solution = root.path(destination)
+    solution = root.find_path(destination)
     return solution unless solution.nil?
 
     node.children.each do |child|
@@ -41,13 +41,13 @@ class Node
     @children = children
   end
 
-  def path(destination, node = self, path = [])
+  def find_path(destination, node = self, path = [])
     path.append(node.position)
     return path if path[-1] == destination
     return nil if node.children == []
 
     node.children.each do |child|
-      current = path(destination, child, path)
+      current = find_path(destination, child, path)
       return current unless current.nil?
 
       path.pop
