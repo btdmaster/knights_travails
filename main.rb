@@ -24,10 +24,11 @@ class Knight
       node.children.append(Node.new(child))
     end
     solution = root.path(destination)
-    return solution if solution
+    return solution unless solution.nil?
 
     node.children.each do |child|
-      knight_moves(child.position, destination, root, child)
+      current = knight_moves(child.position, destination, root, child)
+      return current unless current.nil?
     end
   end
 end
@@ -39,9 +40,21 @@ class Node
     @position = position
     @children = children
   end
-  def path(destination)
+
+  def path(destination, node = self, path = [])
+    path.append(node.position)
+    return path if path[-1] == destination
+    return nil if node.children == []
+
+    node.children.each do |child|
+      current = path(destination, child, path)
+      return current unless current.nil?
+
+      path.pop
+    end
+    nil
   end
 end
 
 knight = Knight.new
-p knight.knight_moves([1, 2], [3, 7])
+p knight.knight_moves([1, 2], [7, 6])
