@@ -19,17 +19,22 @@ class Knight
     [source[0] + adjustment[0], source[1] + adjustment[1]]
   end
 
-  def knight_moves(source, destination, root = Node.new(source), node = root)
-    generate_moves(source).each do |child|
-      node.children.append(Node.new(child, [], node))
+  def knight_moves(source, destination, root = Node.new(source), queue = Queue.new << root, history = [])
+    node = queue.pop
+    node = queue.pop while history.include?(node.position)
+    source = node.position
+    history.append(node.position)
+    generate_moves(source).each do |position|
+      node.children.append(Node.new(position, [], node))
+    end
+    node.children.each do |child|
+      queue << child
     end
     solution = root.find_path(destination)
     return solution unless solution.nil?
 
-    node.children.each do |child|
-      current = knight_moves(child.position, destination, root, child)
-      return current unless current.nil?
-    end
+    current = knight_moves(source, destination, root, queue, history)
+    return current unless current.nil?
   end
 end
 
@@ -42,15 +47,11 @@ class Node
     @parent = parent
   end
 
-  def find_path(destination)
-    node = self
-    queue = Queue.new << node
-    until queue.empty?
-      return locate(node) if node.position == destination
-      node.children.each do |child|
-        queue << child
-      end
-      node = queue.pop
+  def find_path(destination, node = self)
+    return locate(node) if node.position == destination
+    node.children.each do |child|
+      result = find_path(destination, child)
+      return result unless result.nil?
     end
     nil
   end
